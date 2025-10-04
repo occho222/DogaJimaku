@@ -124,6 +124,13 @@ namespace DogaJimaku
                 BtnStop.IsEnabled = true;
                 BtnAddSubtitle.IsEnabled = true;
                 BtnExportVideo.IsEnabled = true;
+                BtnBackward5.IsEnabled = true;
+                BtnBackward1.IsEnabled = true;
+                BtnForward1.IsEnabled = true;
+                BtnForward5.IsEnabled = true;
+                BtnSpeedSlow.IsEnabled = true;
+                BtnSpeedNormal.IsEnabled = true;
+                BtnSpeedFast.IsEnabled = true;
             }
         }
 
@@ -171,6 +178,59 @@ namespace DogaJimaku
             SeekBar.Value = 0;
         }
 
+        private void BtnBackward5_Click(object sender, RoutedEventArgs e)
+        {
+            if (VideoPlayer.NaturalDuration.HasTimeSpan)
+            {
+                var newPosition = VideoPlayer.Position - TimeSpan.FromSeconds(5);
+                VideoPlayer.Position = newPosition < TimeSpan.Zero ? TimeSpan.Zero : newPosition;
+            }
+        }
+
+        private void BtnBackward1_Click(object sender, RoutedEventArgs e)
+        {
+            if (VideoPlayer.NaturalDuration.HasTimeSpan)
+            {
+                var newPosition = VideoPlayer.Position - TimeSpan.FromSeconds(1);
+                VideoPlayer.Position = newPosition < TimeSpan.Zero ? TimeSpan.Zero : newPosition;
+            }
+        }
+
+        private void BtnForward1_Click(object sender, RoutedEventArgs e)
+        {
+            if (VideoPlayer.NaturalDuration.HasTimeSpan)
+            {
+                var newPosition = VideoPlayer.Position + TimeSpan.FromSeconds(1);
+                var duration = VideoPlayer.NaturalDuration.TimeSpan;
+                VideoPlayer.Position = newPosition > duration ? duration : newPosition;
+            }
+        }
+
+        private void BtnForward5_Click(object sender, RoutedEventArgs e)
+        {
+            if (VideoPlayer.NaturalDuration.HasTimeSpan)
+            {
+                var newPosition = VideoPlayer.Position + TimeSpan.FromSeconds(5);
+                var duration = VideoPlayer.NaturalDuration.TimeSpan;
+                VideoPlayer.Position = newPosition > duration ? duration : newPosition;
+            }
+        }
+
+        private void BtnSpeedSlow_Click(object sender, RoutedEventArgs e)
+        {
+            VideoPlayer.SpeedRatio = 0.5;
+        }
+
+        private void BtnSpeedNormal_Click(object sender, RoutedEventArgs e)
+        {
+            VideoPlayer.SpeedRatio = 1.0;
+        }
+
+        private void BtnSpeedFast_Click(object sender, RoutedEventArgs e)
+        {
+            VideoPlayer.SpeedRatio = 2.0;
+        }
+
         private void SeekBar_DragStarted(object sender, DragStartedEventArgs e)
         {
             _isDraggingSeekBar = true;
@@ -206,7 +266,7 @@ namespace DogaJimaku
                 StartTime = currentTime,
                 EndTime = currentTime + 3,
                 Position = SubtitlePosition.BottomCenter,
-                FontSize = 28,
+                FontSize = 48,
                 TextColor = Colors.Red
             };
 

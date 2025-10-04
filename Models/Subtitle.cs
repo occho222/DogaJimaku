@@ -10,7 +10,7 @@ namespace DogaJimaku.Models
         private double _startTime;
         private double _endTime;
         private SubtitlePosition _position = SubtitlePosition.BottomCenter;
-        private double _fontSize = 28;
+        private double _fontSize = 48;
         private Color _textColor = Colors.Red;
 
         public string Text

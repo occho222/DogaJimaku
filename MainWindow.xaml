@@ -84,9 +84,9 @@
                     <!-- 字幕オーバーレイ -->
                     <Grid x:Name="SubtitleOverlay">
                         <TextBlock x:Name="SubtitleText"
-                                   FontSize="28"
+                                   FontSize="48"
                                    FontWeight="Bold"
-                                   Foreground="White"
+                                   Foreground="Red"
                                    TextAlignment="Center"
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Bottom"
@@ -199,12 +199,12 @@
                             <Slider x:Name="SliderFontSize"
                                     Minimum="16"
                                     Maximum="72"
-                                    Value="28"
+                                    Value="48"
                                     TickFrequency="4"
                                     IsSnapToTickEnabled="True"
                                     Margin="0,0,0,5"
                                     ValueChanged="SliderFontSize_ValueChanged"/>
-                            <TextBlock x:Name="TxtFontSizeValue" Text="28px" HorizontalAlignment="Right" Margin="0,0,0,15"/>
+                            <TextBlock x:Name="TxtFontSizeValue" Text="48px" HorizontalAlignment="Right" Margin="0,0,0,15"/>
 
                             <!-- 文字色 -->
                             <TextBlock Text="文字色" FontWeight="SemiBold" Margin="0,0,0,5"/>
@@ -238,9 +238,18 @@
 
                 <!-- 再生コントロール -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                    <Button x:Name="BtnBackward5" Content="⏪ -5秒" Click="BtnBackward5_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,5,0" IsEnabled="False"/>
+                    <Button x:Name="BtnBackward1" Content="◀️ -1秒" Click="BtnBackward1_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,10,0" IsEnabled="False"/>
                     <Button x:Name="BtnPlayPause" Content="▶️ 再生" Click="BtnPlayPause_Click" Style="{StaticResource ModernButton}" Width="100" Margin="0,0,10,0" IsEnabled="False"/>
                     <Button x:Name="BtnStop" Content="⏹️ 停止" Click="BtnStop_Click" Style="{StaticResource ModernButton}" Width="100" Margin="0,0,10,0" IsEnabled="False"/>
-                    <TextBlock x:Name="TxtCurrentTime" Text="00:00:00" VerticalAlignment="Center" Margin="20,0,5,0" FontFamily="Consolas" FontSize="14"/>
+                    <Button x:Name="BtnForward1" Content="▶️ +1秒" Click="BtnForward1_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,5,0" IsEnabled="False"/>
+                    <Button x:Name="BtnForward5" Content="⏩ +5秒" Click="BtnForward5_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,20,0" IsEnabled="False"/>
+
+                    <Button x:Name="BtnSpeedSlow" Content="🐢 0.5x" Click="BtnSpeedSlow_Click" Style="{StaticResource ModernButton}" Width="80" Margin="0,0,5,0" IsEnabled="False" Background="#FF9800"/>
+                    <Button x:Name="BtnSpeedNormal" Content="▶️ 1.0x" Click="BtnSpeedNormal_Click" Style="{StaticResource ModernButton}" Width="80" Margin="0,0,5,0" IsEnabled="False" Background="#4CAF50"/>
+                    <Button x:Name="BtnSpeedFast" Content="🐇 2.0x" Click="BtnSpeedFast_Click" Style="{StaticResource ModernButton}" Width="80" Margin="0,0,20,0" IsEnabled="False" Background="#FF9800"/>
+
+                    <TextBlock x:Name="TxtCurrentTime" Text="00:00:00" VerticalAlignment="Center" Margin="0,0,5,0" FontFamily="Consolas" FontSize="14" FontWeight="Bold"/>
                     <TextBlock Text="/" VerticalAlignment="Center" Margin="0,0,5,0"/>
                     <TextBlock x:Name="TxtDuration" Text="00:00:00" VerticalAlignment="Center" FontFamily="Consolas" FontSize="14"/>
                 </StackPanel>
