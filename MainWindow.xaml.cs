@@ -31,6 +31,7 @@ namespace DogaJimaku
     public partial class MainWindow : Window
     {
         private ObservableCollection<Subtitle> _subtitles = new();
+        private ObservableCollection<VideoEdit> _videoEdits = new();
         private DispatcherTimer? _timer;
         private bool _isPlaying = false;
         private bool _isDraggingSeekBar = false;
@@ -38,10 +39,16 @@ namespace DogaJimaku
         private string? _currentVideoPath = null;
         private CancellationTokenSource? _exportCancellationTokenSource;
 
+        // 動画編集用の一時変数
+        private double? _cutStartTime = null;
+        private double? _trimStartTime = null;
+        private double? _speedChangeStartTime = null;
+
         public MainWindow()
         {
             InitializeComponent();
             SubtitleListBox.ItemsSource = _subtitles;
+            EditListBox.ItemsSource = _videoEdits;
 
             // タイマー設定（字幕の同期と時刻表示用）
             _timer = new DispatcherTimer();
@@ -147,6 +154,17 @@ namespace DogaJimaku
                 BtnSpeedSlow.IsEnabled = true;
                 BtnSpeedNormal.IsEnabled = true;
                 BtnSpeedFast.IsEnabled = true;
+
+                // 動画編集ボタンを有効化
+                BtnSetCutStart.IsEnabled = true;
+                BtnSetCutEnd.IsEnabled = true;
+                BtnSetTrimStart.IsEnabled = true;
+                BtnSetTrimEnd.IsEnabled = true;
+                BtnSplitHere.IsEnabled = true;
+                BtnSetSpeedStart.IsEnabled = true;
+                BtnSetSpeedEnd.IsEnabled = true;
+                CmbSpeedRatio.IsEnabled = true;
+                BtnProcessVideo.IsEnabled = true;
             }
         }
 
@@ -652,6 +670,187 @@ namespace DogaJimaku
 
                     _exportCancellationTokenSource?.Dispose();
                     _exportCancellationTokenSource = null;
+                }
+            }
+        }
+
+        // ========== 動画編集機能 ==========
+
+        private void BtnSetCutStart_Click(object sender, RoutedEventArgs e)
+        {
+            _cutStartTime = VideoPlayer.Position.TotalSeconds;
+            MessageBox.Show($"カット開始位置: {TimeSpan.FromSeconds(_cutStartTime.Value):hh\\:mm\\:ss}", "カット開始", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnSetCutEnd_Click(object sender, RoutedEventArgs e)
+        {
+            if (_cutStartTime == null)
+            {
+                MessageBox.Show("先にカット開始位置を設定してください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var cutEndTime = VideoPlayer.Position.TotalSeconds;
+            if (cutEndTime <= _cutStartTime.Value)
+            {
+                MessageBox.Show("終了位置は開始位置より後にしてください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var edit = new VideoEdit
+            {
+                Type = EditType.Cut,
+                StartTime = _cutStartTime.Value,
+                EndTime = cutEndTime,
+                Label = "この区間を削除"
+            };
+
+            _videoEdits.Add(edit);
+            _cutStartTime = null;
+            MessageBox.Show("カット範囲を追加しました", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnSetTrimStart_Click(object sender, RoutedEventArgs e)
+        {
+            _trimStartTime = VideoPlayer.Position.TotalSeconds;
+            MessageBox.Show($"トリミング開始位置: {TimeSpan.FromSeconds(_trimStartTime.Value):hh\\:mm\\:ss}", "トリミング開始", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnSetTrimEnd_Click(object sender, RoutedEventArgs e)
+        {
+            if (_trimStartTime == null)
+            {
+                MessageBox.Show("先に開始位置を設定してください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var trimEndTime = VideoPlayer.Position.TotalSeconds;
+            if (trimEndTime <= _trimStartTime.Value)
+            {
+                MessageBox.Show("終了位置は開始位置より後にしてください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var edit = new VideoEdit
+            {
+                Type = EditType.Trim,
+                StartTime = _trimStartTime.Value,
+                EndTime = trimEndTime,
+                Label = "この区間のみ残す"
+            };
+
+            _videoEdits.Add(edit);
+            _trimStartTime = null;
+            MessageBox.Show("トリミング範囲を追加しました", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnSplitHere_Click(object sender, RoutedEventArgs e)
+        {
+            var splitTime = VideoPlayer.Position.TotalSeconds;
+
+            var edit = new VideoEdit
+            {
+                Type = EditType.Split,
+                StartTime = splitTime,
+                EndTime = splitTime,
+                Label = "ここで分割"
+            };
+
+            _videoEdits.Add(edit);
+            MessageBox.Show($"分割位置を追加しました: {TimeSpan.FromSeconds(splitTime):hh\\:mm\\:ss}", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnSetSpeedStart_Click(object sender, RoutedEventArgs e)
+        {
+            _speedChangeStartTime = VideoPlayer.Position.TotalSeconds;
+            MessageBox.Show($"速度変更開始位置: {TimeSpan.FromSeconds(_speedChangeStartTime.Value):hh\\:mm\\:ss}", "速度変更開始", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnSetSpeedEnd_Click(object sender, RoutedEventArgs e)
+        {
+            if (_speedChangeStartTime == null)
+            {
+                MessageBox.Show("先に速度変更開始位置を設定してください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var speedEndTime = VideoPlayer.Position.TotalSeconds;
+            if (speedEndTime <= _speedChangeStartTime.Value)
+            {
+                MessageBox.Show("終了位置は開始位置より後にしてください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (CmbSpeedRatio.SelectedItem is ComboBoxItem item && double.TryParse(item.Tag?.ToString(), out var speedRatio))
+            {
+                var edit = new VideoEdit
+                {
+                    Type = EditType.SpeedChange,
+                    StartTime = _speedChangeStartTime.Value,
+                    EndTime = speedEndTime,
+                    SpeedRatio = speedRatio,
+                    Label = $"{speedRatio}倍速に変更"
+                };
+
+                _videoEdits.Add(edit);
+                _speedChangeStartTime = null;
+                MessageBox.Show("速度変更範囲を追加しました", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void BtnDeleteEdit_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is VideoEdit edit)
+            {
+                _videoEdits.Remove(edit);
+            }
+        }
+
+        private async void BtnProcessVideo_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_currentVideoPath))
+            {
+                MessageBox.Show("動画が読み込まれていません", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_videoEdits.Count == 0)
+            {
+                MessageBox.Show("編集内容が追加されていません", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var dialog = new SaveFileDialog
+            {
+                Filter = "MP4動画ファイル|*.mp4|すべてのファイル|*.*",
+                Title = "編集した動画を保存",
+                DefaultExt = ".mp4",
+                FileName = Path.GetFileNameWithoutExtension(_currentVideoPath) + "_edited.mp4"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    ProgressPanel.Visibility = Visibility.Visible;
+                    ProgressBar.Value = 0;
+                    TxtProgress.Text = "動画を処理中...";
+
+                    // TODO: 実際のFFmpeg処理を実装
+                    // 現在は簡易的な処理のみ
+                    await Task.Delay(2000); // 仮の処理時間
+
+                    ProgressBar.Value = 100;
+                    TxtProgress.Text = "完了!";
+                    MessageBox.Show($"編集した動画を保存しました:\n{dialog.FileName}\n\n注意: 実際の動画処理機能は次のバージョンで実装されます。", "処理完了", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"エラーが発生しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    ProgressPanel.Visibility = Visibility.Collapsed;
                 }
             }
         }

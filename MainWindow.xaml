@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DogaJimaku"
         mc:Ignorable="d"
-        Title="DogaJimaku v1.0.0 - 動画字幕エディタ" Height="800" Width="1400">
+        Title="DogaJimaku v1.1.0 - 動画字幕エディタ" Height="800" Width="1400">
     <Window.Resources>
         <Style x:Key="ModernButton" TargetType="Button">
             <Setter Property="Background" Value="#2196F3"/>
@@ -49,12 +49,12 @@
         <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="10">
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button x:Name="BtnOpenVideo" Content="📁 動画を開く" Style="{StaticResource ModernButton}" Click="BtnOpenVideo_Click" Margin="0,0,10,0"/>
-                    <Button x:Name="BtnOpenProject" Content="📂 プロジェクトを開く" Style="{StaticResource ModernButton}" Click="BtnOpenProject_Click" Margin="0,0,10,0" Background="#9C27B0"/>
-                    <Button x:Name="BtnAddSubtitle" Content="➕ 字幕追加" Style="{StaticResource ModernButton}" Click="BtnAddSubtitle_Click" Margin="0,0,10,0" IsEnabled="False"/>
-                    <Button x:Name="BtnSave" Content="💾 保存" Style="{StaticResource ModernButton}" Click="BtnSave_Click" Margin="0,0,10,0" IsEnabled="False"/>
-                    <Button x:Name="BtnExport" Content="📤 字幕出力" Style="{StaticResource ModernButton}" Click="BtnExport_Click" Margin="0,0,10,0" IsEnabled="False"/>
-                    <Button x:Name="BtnExportVideo" Content="🎬 動画出力" Style="{StaticResource ModernButton}" Click="BtnExportVideo_Click" Margin="0,0,10,0" IsEnabled="False" Background="#FF6F00"/>
+                    <Button x:Name="BtnOpenVideo" Content="📁 動画を開く" Style="{StaticResource ModernButton}" Click="BtnOpenVideo_Click" Margin="0,0,10,0" ToolTip="編集する動画ファイルを選択します"/>
+                    <Button x:Name="BtnOpenProject" Content="📂 プロジェクトを開く" Style="{StaticResource ModernButton}" Click="BtnOpenProject_Click" Margin="0,0,10,0" Background="#9C27B0" ToolTip="保存したプロジェクト(.djsub)を開きます"/>
+                    <Button x:Name="BtnAddSubtitle" Content="➕ 字幕追加" Style="{StaticResource ModernButton}" Click="BtnAddSubtitle_Click" Margin="0,0,10,0" IsEnabled="False" ToolTip="現在の再生位置に字幕を追加します"/>
+                    <Button x:Name="BtnSave" Content="💾 保存" Style="{StaticResource ModernButton}" Click="BtnSave_Click" Margin="0,0,10,0" IsEnabled="False" ToolTip="プロジェクトを保存します（動画パス、字幕データ）"/>
+                    <Button x:Name="BtnExport" Content="📤 字幕出力" Style="{StaticResource ModernButton}" Click="BtnExport_Click" Margin="0,0,10,0" IsEnabled="False" ToolTip="字幕をSRT形式で出力します"/>
+                    <Button x:Name="BtnExportVideo" Content="🎬 動画出力" Style="{StaticResource ModernButton}" Click="BtnExportVideo_Click" Margin="0,0,10,0" IsEnabled="False" Background="#FF6F00" ToolTip="字幕を焼き込んだ動画を出力します"/>
                 </StackPanel>
 
                 <!-- 進捗表示 -->
@@ -132,7 +132,8 @@
                                      Padding="8"
                                      FontSize="14"
                                      Margin="0,0,0,15"
-                                     TextChanged="TxtSubtitleText_TextChanged"/>
+                                     TextChanged="TxtSubtitleText_TextChanged"
+                                     ToolTip="字幕として表示するテキストを入力します"/>
 
                             <!-- 開始時間 -->
                             <TextBlock Text="開始時間 (秒)" FontWeight="SemiBold" Margin="0,0,0,5"/>
@@ -146,7 +147,8 @@
                                          Padding="8"
                                          FontSize="14"
                                          Margin="0,0,10,0"
-                                         TextChanged="TxtStartTime_TextChanged"/>
+                                         TextChanged="TxtStartTime_TextChanged"
+                                         ToolTip="字幕の開始時間を秒単位で入力します"/>
                                 <Button Grid.Column="1"
                                         Content="現在位置"
                                         Click="BtnSetStartTime_Click"
@@ -154,7 +156,8 @@
                                         Background="#4CAF50"
                                         Foreground="White"
                                         BorderThickness="0"
-                                        Cursor="Hand"/>
+                                        Cursor="Hand"
+                                        ToolTip="動画の現在位置を開始時間に設定します"/>
                             </Grid>
 
                             <!-- 終了時間 -->
@@ -169,7 +172,8 @@
                                          Padding="8"
                                          FontSize="14"
                                          Margin="0,0,10,0"
-                                         TextChanged="TxtEndTime_TextChanged"/>
+                                         TextChanged="TxtEndTime_TextChanged"
+                                         ToolTip="字幕の終了時間を秒単位で入力します"/>
                                 <Button Grid.Column="1"
                                         Content="現在位置"
                                         Click="BtnSetEndTime_Click"
@@ -177,7 +181,8 @@
                                         Background="#4CAF50"
                                         Foreground="White"
                                         BorderThickness="0"
-                                        Cursor="Hand"/>
+                                        Cursor="Hand"
+                                        ToolTip="動画の現在位置を終了時間に設定します"/>
                             </Grid>
 
                             <!-- 位置設定 -->
@@ -187,7 +192,8 @@
                                       Padding="8"
                                       FontSize="14"
                                       Margin="0,0,0,15"
-                                      SelectionChanged="CmbPosition_SelectionChanged">
+                                      SelectionChanged="CmbPosition_SelectionChanged"
+                                      ToolTip="字幕を表示する位置を選択します">
                                 <ComboBoxItem Content="下部中央"/>
                                 <ComboBoxItem Content="上部中央"/>
                                 <ComboBoxItem Content="中央"/>
@@ -204,7 +210,8 @@
                                     TickFrequency="4"
                                     IsSnapToTickEnabled="True"
                                     Margin="0,0,0,5"
-                                    ValueChanged="SliderFontSize_ValueChanged"/>
+                                    ValueChanged="SliderFontSize_ValueChanged"
+                                    ToolTip="字幕のフォントサイズを調整します(16-72px)"/>
                             <TextBlock x:Name="TxtFontSizeValue" Text="48px" HorizontalAlignment="Right" Margin="0,0,0,15"/>
 
                             <!-- 文字色 -->
@@ -214,7 +221,8 @@
                                       Padding="8"
                                       FontSize="14"
                                       Margin="0,0,0,15"
-                                      SelectionChanged="CmbTextColor_SelectionChanged">
+                                      SelectionChanged="CmbTextColor_SelectionChanged"
+                                      ToolTip="字幕の文字色を選択します">
                                 <ComboBoxItem Content="🔴 赤" Tag="Red"/>
                                 <ComboBoxItem Content="⚪ 白" Tag="White"/>
                                 <ComboBoxItem Content="🟡 黄" Tag="Yellow"/>
@@ -239,16 +247,16 @@
 
                 <!-- 再生コントロール -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                    <Button x:Name="BtnBackward5" Content="⏪ -5秒" Click="BtnBackward5_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,5,0" IsEnabled="False"/>
-                    <Button x:Name="BtnBackward1" Content="◀️ -1秒" Click="BtnBackward1_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,10,0" IsEnabled="False"/>
-                    <Button x:Name="BtnPlayPause" Content="▶️ 再生" Click="BtnPlayPause_Click" Style="{StaticResource ModernButton}" Width="100" Margin="0,0,10,0" IsEnabled="False"/>
-                    <Button x:Name="BtnStop" Content="⏹️ 停止" Click="BtnStop_Click" Style="{StaticResource ModernButton}" Width="100" Margin="0,0,10,0" IsEnabled="False"/>
-                    <Button x:Name="BtnForward1" Content="▶️ +1秒" Click="BtnForward1_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,5,0" IsEnabled="False"/>
-                    <Button x:Name="BtnForward5" Content="⏩ +5秒" Click="BtnForward5_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,20,0" IsEnabled="False"/>
+                    <Button x:Name="BtnBackward5" Content="⏪ -5秒" Click="BtnBackward5_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,5,0" IsEnabled="False" ToolTip="再生位置を5秒前に戻します"/>
+                    <Button x:Name="BtnBackward1" Content="◀️ -1秒" Click="BtnBackward1_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,10,0" IsEnabled="False" ToolTip="再生位置を1秒前に戻します"/>
+                    <Button x:Name="BtnPlayPause" Content="▶️ 再生" Click="BtnPlayPause_Click" Style="{StaticResource ModernButton}" Width="100" Margin="0,0,10,0" IsEnabled="False" ToolTip="動画を再生/一時停止します"/>
+                    <Button x:Name="BtnStop" Content="⏹️ 停止" Click="BtnStop_Click" Style="{StaticResource ModernButton}" Width="100" Margin="0,0,10,0" IsEnabled="False" ToolTip="動画を停止して最初に戻します"/>
+                    <Button x:Name="BtnForward1" Content="▶️ +1秒" Click="BtnForward1_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,5,0" IsEnabled="False" ToolTip="再生位置を1秒先に進めます"/>
+                    <Button x:Name="BtnForward5" Content="⏩ +5秒" Click="BtnForward5_Click" Style="{StaticResource ModernButton}" Width="90" Margin="0,0,20,0" IsEnabled="False" ToolTip="再生位置を5秒先に進めます"/>
 
-                    <Button x:Name="BtnSpeedSlow" Content="🐢 0.5x" Click="BtnSpeedSlow_Click" Style="{StaticResource ModernButton}" Width="80" Margin="0,0,5,0" IsEnabled="False" Background="#FF9800"/>
-                    <Button x:Name="BtnSpeedNormal" Content="▶️ 1.0x" Click="BtnSpeedNormal_Click" Style="{StaticResource ModernButton}" Width="80" Margin="0,0,5,0" IsEnabled="False" Background="#4CAF50"/>
-                    <Button x:Name="BtnSpeedFast" Content="🐇 2.0x" Click="BtnSpeedFast_Click" Style="{StaticResource ModernButton}" Width="80" Margin="0,0,20,0" IsEnabled="False" Background="#FF9800"/>
+                    <Button x:Name="BtnSpeedSlow" Content="🐢 0.5x" Click="BtnSpeedSlow_Click" Style="{StaticResource ModernButton}" Width="80" Margin="0,0,5,0" IsEnabled="False" Background="#FF9800" ToolTip="再生速度を0.5倍(スロー)に設定します"/>
+                    <Button x:Name="BtnSpeedNormal" Content="▶️ 1.0x" Click="BtnSpeedNormal_Click" Style="{StaticResource ModernButton}" Width="80" Margin="0,0,5,0" IsEnabled="False" Background="#4CAF50" ToolTip="再生速度を標準(1.0倍)に戻します"/>
+                    <Button x:Name="BtnSpeedFast" Content="🐇 2.0x" Click="BtnSpeedFast_Click" Style="{StaticResource ModernButton}" Width="80" Margin="0,0,20,0" IsEnabled="False" Background="#FF9800" ToolTip="再生速度を2倍(倍速)に設定します"/>
 
                     <TextBlock x:Name="TxtCurrentTime" Text="00:00:00" VerticalAlignment="Center" Margin="0,0,5,0" FontFamily="Consolas" FontSize="14" FontWeight="Bold"/>
                     <TextBlock Text="/" VerticalAlignment="Center" Margin="0,0,5,0"/>
@@ -270,13 +278,12 @@
 
         <!-- タイムライン/字幕リスト -->
         <Border Grid.Row="3" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="15">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Text="字幕タイムライン" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+            <TabControl x:Name="TabControl" BorderThickness="0">
+                <TabItem Header="字幕タイムライン" FontSize="14" FontWeight="SemiBold">
+                    <Grid Margin="0,10,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
                 <ListBox Grid.Row="1"
                          x:Name="SubtitleListBox"
@@ -323,7 +330,89 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-            </Grid>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="動画編集" FontSize="14" FontWeight="SemiBold">
+                    <Grid Margin="0,10,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- 編集コントロール -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button x:Name="BtnSetCutStart" Content="✂️ カット開始" Click="BtnSetCutStart_Click" Style="{StaticResource ModernButton}" Width="120" Margin="0,0,5,0" IsEnabled="False" Background="#F44336" ToolTip="削除したい部分の開始位置を設定します"/>
+                            <Button x:Name="BtnSetCutEnd" Content="✂️ カット終了" Click="BtnSetCutEnd_Click" Style="{StaticResource ModernButton}" Width="120" Margin="0,0,15,0" IsEnabled="False" Background="#F44336" ToolTip="削除したい部分の終了位置を設定します"/>
+
+                            <Button x:Name="BtnSetTrimStart" Content="✂️ 開始位置" Click="BtnSetTrimStart_Click" Style="{StaticResource ModernButton}" Width="110" Margin="0,0,5,0" IsEnabled="False" Background="#FF9800" ToolTip="残したい部分の開始位置を設定します(前を切り落とし)"/>
+                            <Button x:Name="BtnSetTrimEnd" Content="✂️ 終了位置" Click="BtnSetTrimEnd_Click" Style="{StaticResource ModernButton}" Width="110" Margin="0,0,15,0" IsEnabled="False" Background="#FF9800" ToolTip="残したい部分の終了位置を設定します(後を切り落とし)"/>
+
+                            <Button x:Name="BtnSplitHere" Content="✂️ ここで分割" Click="BtnSplitHere_Click" Style="{StaticResource ModernButton}" Width="110" Margin="0,0,15,0" IsEnabled="False" Background="#9C27B0" ToolTip="現在位置で動画を分割します"/>
+
+                            <Button x:Name="BtnSetSpeedStart" Content="⚡ 速度開始" Click="BtnSetSpeedStart_Click" Style="{StaticResource ModernButton}" Width="110" Margin="0,0,5,0" IsEnabled="False" Background="#2196F3" ToolTip="速度変更したい部分の開始位置を設定します"/>
+                            <Button x:Name="BtnSetSpeedEnd" Content="⚡ 速度終了" Click="BtnSetSpeedEnd_Click" Style="{StaticResource ModernButton}" Width="110" Margin="0,0,5,0" IsEnabled="False" Background="#2196F3" ToolTip="速度変更したい部分の終了位置を設定します"/>
+                            <ComboBox x:Name="CmbSpeedRatio" Width="80" Margin="0,0,10,0" SelectedIndex="2" IsEnabled="False" ToolTip="速度変更の倍率を選択します">
+                                <ComboBoxItem Content="0.5x" Tag="0.5"/>
+                                <ComboBoxItem Content="0.75x" Tag="0.75"/>
+                                <ComboBoxItem Content="1.0x" Tag="1.0"/>
+                                <ComboBoxItem Content="1.5x" Tag="1.5"/>
+                                <ComboBoxItem Content="2.0x" Tag="2.0"/>
+                            </ComboBox>
+
+                            <Button x:Name="BtnProcessVideo" Content="🎬 動画を処理" Click="BtnProcessVideo_Click" Style="{StaticResource ModernButton}" Width="130" Margin="0,0,0,0" IsEnabled="False" Background="#4CAF50" ToolTip="編集リストに基づいて動画を処理します"/>
+                        </StackPanel>
+
+                        <!-- 編集リスト -->
+                        <ListBox Grid.Row="1"
+                                 x:Name="EditListBox"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FAFAFA"
+                                            BorderBrush="#E0E0E0"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Padding="10"
+                                            Margin="0,2">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0" Text="{Binding TypeLabel}" FontWeight="Bold" VerticalAlignment="Center"/>
+
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding StartTimeFormatted}" FontFamily="Consolas" FontSize="12" Foreground="#666"/>
+                                                <TextBlock Text="↓" FontSize="10" Foreground="#999" HorizontalAlignment="Center"/>
+                                                <TextBlock Text="{Binding EndTimeFormatted}" FontFamily="Consolas" FontSize="12" Foreground="#666"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="10,0">
+                                                <TextBlock Text="{Binding Label}" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding SpeedLabel}" Foreground="#666" FontSize="12"/>
+                                            </StackPanel>
+
+                                            <Button Grid.Column="3"
+                                                    Content="🗑️"
+                                                    Click="BtnDeleteEdit_Click"
+                                                    Background="#F44336"
+                                                    Foreground="White"
+                                                    BorderThickness="0"
+                                                    Padding="10,5"
+                                                    Cursor="Hand"
+                                                    Tag="{Binding}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </TabItem>
+            </TabControl>
         </Border>
     </Grid>
 </Window>
