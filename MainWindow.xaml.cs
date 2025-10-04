@@ -12,6 +12,22 @@ using Microsoft.Win32;
 
 namespace DogaJimaku
 {
+    public class ProjectData
+    {
+        public string? VideoPath { get; set; }
+        public List<SubtitleData>? Subtitles { get; set; }
+    }
+
+    public class SubtitleData
+    {
+        public string? Text { get; set; }
+        public double StartTime { get; set; }
+        public double EndTime { get; set; }
+        public string? Position { get; set; }
+        public double FontSize { get; set; }
+        public string? TextColor { get; set; }
+    }
+
     public partial class MainWindow : Window
     {
         private ObservableCollection<Subtitle> _subtitles = new();
@@ -417,13 +433,89 @@ namespace DogaJimaku
                         s.StartTime,
                         s.EndTime,
                         Position = s.Position.ToString(),
-                        s.FontSize
+                        s.FontSize,
+                        TextColor = s.TextColor.ToString()
                     })
                 };
 
                 var json = JsonSerializer.Serialize(projectData, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(dialog.FileName, json);
                 MessageBox.Show("保存しました", "保存完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void BtnOpenProject_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "字幕プロジェクトファイル|*.djsub|すべてのファイル|*.*",
+                Title = "字幕プロジェクトを開く"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var json = File.ReadAllText(dialog.FileName);
+                    var projectData = JsonSerializer.Deserialize<ProjectData>(json);
+
+                    if (projectData == null)
+                    {
+                        MessageBox.Show("プロジェクトファイルの読み込みに失敗しました", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // 動画ファイルを読み込み
+                    if (!string.IsNullOrEmpty(projectData.VideoPath) && File.Exists(projectData.VideoPath))
+                    {
+                        _currentVideoPath = projectData.VideoPath;
+                        VideoPlayer.Source = new Uri(_currentVideoPath);
+                        NoVideoMessage.Visibility = Visibility.Collapsed;
+                        BtnPlayPause.IsEnabled = true;
+                        BtnStop.IsEnabled = true;
+                        BtnAddSubtitle.IsEnabled = true;
+                        BtnExportVideo.IsEnabled = true;
+                        BtnBackward5.IsEnabled = true;
+                        BtnBackward1.IsEnabled = true;
+                        BtnForward1.IsEnabled = true;
+                        BtnForward5.IsEnabled = true;
+                        BtnSpeedSlow.IsEnabled = true;
+                        BtnSpeedNormal.IsEnabled = true;
+                        BtnSpeedFast.IsEnabled = true;
+                    }
+                    else if (!string.IsNullOrEmpty(projectData.VideoPath))
+                    {
+                        MessageBox.Show($"動画ファイルが見つかりません:\n{projectData.VideoPath}\n\n字幕データのみ読み込みます。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+
+                    // 字幕データを読み込み
+                    _subtitles.Clear();
+                    if (projectData.Subtitles != null)
+                    {
+                        foreach (var sub in projectData.Subtitles)
+                        {
+                            var subtitle = new Subtitle
+                            {
+                                Text = sub.Text ?? "",
+                                StartTime = sub.StartTime,
+                                EndTime = sub.EndTime,
+                                Position = Enum.TryParse<SubtitlePosition>(sub.Position, out var pos) ? pos : SubtitlePosition.BottomCenter,
+                                FontSize = sub.FontSize > 0 ? sub.FontSize : 48,
+                                TextColor = !string.IsNullOrEmpty(sub.TextColor) ? (Color)ColorConverter.ConvertFromString(sub.TextColor) : Colors.Red
+                            };
+                            _subtitles.Add(subtitle);
+                        }
+                    }
+
+                    BtnSave.IsEnabled = _subtitles.Count > 0;
+                    BtnExport.IsEnabled = _subtitles.Count > 0;
+
+                    MessageBox.Show("プロジェクトを読み込みました", "読み込み完了", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"プロジェクトの読み込みに失敗しました:\n{ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 

@@ -50,6 +50,7 @@
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                     <Button x:Name="BtnOpenVideo" Content="📁 動画を開く" Style="{StaticResource ModernButton}" Click="BtnOpenVideo_Click" Margin="0,0,10,0"/>
+                    <Button x:Name="BtnOpenProject" Content="📂 プロジェクトを開く" Style="{StaticResource ModernButton}" Click="BtnOpenProject_Click" Margin="0,0,10,0" Background="#9C27B0"/>
                     <Button x:Name="BtnAddSubtitle" Content="➕ 字幕追加" Style="{StaticResource ModernButton}" Click="BtnAddSubtitle_Click" Margin="0,0,10,0" IsEnabled="False"/>
                     <Button x:Name="BtnSave" Content="💾 保存" Style="{StaticResource ModernButton}" Click="BtnSave_Click" Margin="0,0,10,0" IsEnabled="False"/>
                     <Button x:Name="BtnExport" Content="📤 字幕出力" Style="{StaticResource ModernButton}" Click="BtnExport_Click" Margin="0,0,10,0" IsEnabled="False"/>
