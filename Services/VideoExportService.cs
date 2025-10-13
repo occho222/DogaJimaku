@@ -343,15 +343,28 @@ namespace DogaJimaku.Services
                 // 速度変更
                 if (Math.Abs(segment.SpeedRatio - 1.0) > 0.01)
                 {
-                    conversion.AddParameter($"-filter:v \"setpts={1.0 / segment.SpeedRatio}*PTS\"");
-                    conversion.AddParameter($"-filter:a \"atempo={segment.SpeedRatio}\"");
+                    var videoFilter = $"setpts={1.0 / segment.SpeedRatio}*PTS";
+                    conversion.AddParameter($"-filter:v \"{videoFilter}\"");
+
+                    // atempoは0.5～2.0の範囲のみサポート。それ以外は複数回適用
+                    var audioFilter = BuildAtempoFilter(segment.SpeedRatio);
+                    conversion.AddParameter($"-filter:a \"{audioFilter}\"");
+
+                    conversion.AddParameter("-c:v libx264");
+                    conversion.AddParameter("-preset medium");
+                    conversion.AddParameter("-crf 23");
+                    conversion.AddParameter("-c:a aac");
+                    conversion.AddParameter("-b:a 192k");
+                }
+                else
+                {
+                    conversion.AddParameter("-c:v libx264");
+                    conversion.AddParameter("-preset medium");
+                    conversion.AddParameter("-crf 23");
+                    conversion.AddParameter("-c:a aac");
+                    conversion.AddParameter("-b:a 192k");
                 }
 
-                conversion.AddParameter("-c:v libx264");
-                conversion.AddParameter("-preset medium");
-                conversion.AddParameter("-crf 23");
-                conversion.AddParameter("-c:a aac");
-                conversion.AddParameter("-b:a 192k");
                 conversion.AddParameter($"\"{tempFile}\"");
 
                 var progress = (i * 80.0) / segments.Count;
@@ -383,59 +396,89 @@ namespace DogaJimaku.Services
             return true;
         }
 
+        private string BuildAtempoFilter(double speedRatio)
+        {
+            // atempoは0.5～2.0の範囲のみサポート
+            if (speedRatio >= 0.5 && speedRatio <= 2.0)
+            {
+                return $"atempo={speedRatio}";
+            }
+
+            // 範囲外の場合は複数のatempoを連鎖
+            var filters = new List<string>();
+            var remaining = speedRatio;
+
+            while (remaining > 2.0)
+            {
+                filters.Add("atempo=2.0");
+                remaining /= 2.0;
+            }
+
+            while (remaining < 0.5)
+            {
+                filters.Add("atempo=0.5");
+                remaining /= 0.5;
+            }
+
+            if (Math.Abs(remaining - 1.0) > 0.01)
+            {
+                filters.Add($"atempo={remaining}");
+            }
+
+            return string.Join(",", filters);
+        }
+
         private List<VideoClip> GenerateSegments(double duration, List<VideoEdit> edits)
         {
             var segments = new List<VideoClip>();
-            var currentTime = 0.0;
 
-            // カット範囲をソート
-            var cutEdits = edits.Where(e => e.Type == EditType.Cut).OrderBy(e => e.StartTime).ToList();
+            // すべての境界点を収集（カットと速度変更の開始・終了位置）
+            var boundaries = new SortedSet<double> { 0.0, duration };
 
-            while (currentTime < duration)
+            var cutEdits = edits.Where(e => e.Type == EditType.Cut).ToList();
+            var speedEdits = edits.Where(e => e.Type == EditType.SpeedChange).ToList();
+
+            foreach (var cut in cutEdits)
             {
-                // 現在位置から次のカット開始までの区間を追加
-                var nextCut = cutEdits.FirstOrDefault(e => e.StartTime >= currentTime);
+                boundaries.Add(cut.StartTime);
+                boundaries.Add(cut.EndTime);
+            }
 
-                if (nextCut != null)
+            foreach (var speed in speedEdits)
+            {
+                boundaries.Add(speed.StartTime);
+                boundaries.Add(speed.EndTime);
+            }
+
+            var boundaryList = boundaries.ToList();
+
+            // 各区間をチェック
+            for (int i = 0; i < boundaryList.Count - 1; i++)
+            {
+                var start = boundaryList[i];
+                var end = boundaryList[i + 1];
+                var midPoint = (start + end) / 2.0;
+
+                // この区間がカット範囲内か確認
+                var isCut = cutEdits.Any(c => c.StartTime <= midPoint && c.EndTime >= midPoint);
+
+                if (!isCut)
                 {
-                    // カット開始前まで
-                    if (nextCut.StartTime > currentTime)
-                    {
-                        var segment = new VideoClip
-                        {
-                            StartTime = currentTime,
-                            EndTime = nextCut.StartTime,
-                            SpeedRatio = GetSpeedRatioForTime(currentTime, edits)
-                        };
-                        segments.Add(segment);
-                    }
-                    currentTime = nextCut.EndTime;
-                }
-                else
-                {
-                    // 最後の区間
+                    // 速度変更があるか確認
+                    var speedEdit = speedEdits.FirstOrDefault(s =>
+                        s.StartTime <= midPoint && s.EndTime >= midPoint);
+
                     var segment = new VideoClip
                     {
-                        StartTime = currentTime,
-                        EndTime = duration,
-                        SpeedRatio = GetSpeedRatioForTime(currentTime, edits)
+                        StartTime = start,
+                        EndTime = end,
+                        SpeedRatio = speedEdit?.SpeedRatio ?? 1.0
                     };
                     segments.Add(segment);
-                    break;
                 }
             }
 
             return segments;
-        }
-
-        private double GetSpeedRatioForTime(double time, List<VideoEdit> edits)
-        {
-            var speedEdit = edits.FirstOrDefault(e =>
-                e.Type == EditType.SpeedChange &&
-                e.StartTime <= time &&
-                e.EndTime >= time);
-
-            return speedEdit?.SpeedRatio ?? 1.0;
         }
 
         private async Task ConcatenateVideosAsync(List<string> inputFiles, string outputFile, CancellationToken cancellationToken)
