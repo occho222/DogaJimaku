@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DogaJimaku"
         mc:Ignorable="d"
-        Title="DogaJimaku v1.2.2 - 動画字幕エディタ" Height="800" Width="1400">
+        Title="DogaJimaku v1.2.3 - 動画字幕エディタ" Height="800" Width="1400">
     <Window.Resources>
         <Style x:Key="ModernButton" TargetType="Button">
             <Setter Property="Background" Value="#2196F3"/>
@@ -223,13 +223,48 @@
                                       Margin="0,0,0,15"
                                       SelectionChanged="CmbTextColor_SelectionChanged"
                                       ToolTip="字幕の文字色を選択します">
-                                <ComboBoxItem Content="🔴 赤" Tag="Red"/>
-                                <ComboBoxItem Content="⚪ 白" Tag="White"/>
-                                <ComboBoxItem Content="🟡 黄" Tag="Yellow"/>
-                                <ComboBoxItem Content="🟢 緑" Tag="Lime"/>
-                                <ComboBoxItem Content="🔵 青" Tag="Cyan"/>
-                                <ComboBoxItem Content="🟣 紫" Tag="Magenta"/>
-                                <ComboBoxItem Content="⚫ 黒" Tag="Black"/>
+                                <ComboBoxItem Tag="Red">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="20" Height="20" Background="Red" Margin="0,0,8,0" CornerRadius="3"/>
+                                        <TextBlock Text="赤" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="White">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="20" Height="20" Background="White" BorderBrush="#CCCCCC" BorderThickness="1" Margin="0,0,8,0" CornerRadius="3"/>
+                                        <TextBlock Text="白" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="Yellow">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="20" Height="20" Background="Yellow" Margin="0,0,8,0" CornerRadius="3"/>
+                                        <TextBlock Text="黄" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="Lime">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="20" Height="20" Background="Lime" Margin="0,0,8,0" CornerRadius="3"/>
+                                        <TextBlock Text="緑" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="Cyan">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="20" Height="20" Background="Cyan" Margin="0,0,8,0" CornerRadius="3"/>
+                                        <TextBlock Text="青" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="Magenta">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="20" Height="20" Background="Magenta" Margin="0,0,8,0" CornerRadius="3"/>
+                                        <TextBlock Text="紫" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="Black">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="20" Height="20" Background="Black" Margin="0,0,8,0" CornerRadius="3"/>
+                                        <TextBlock Text="黒" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </ComboBoxItem>
                             </ComboBox>
                         </StackPanel>
                     </ScrollViewer>
