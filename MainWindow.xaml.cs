@@ -72,10 +72,26 @@ namespace DogaJimaku
                 }
 
                 // 時刻表示更新
-                TxtCurrentTime.Text = VideoPlayer.Position.ToString(@"hh\:mm\:ss");
+                UpdateCurrentTimeDisplay();
 
                 // 字幕表示更新
                 UpdateSubtitleDisplay(VideoPlayer.Position.TotalSeconds);
+            }
+        }
+
+        private void UpdateCurrentTimeDisplay()
+        {
+            TxtCurrentTime.Text = VideoPlayer.Position.ToString(@"hh\:mm\:ss");
+
+            // シークバーも更新
+            if (!_isDraggingSeekBar && VideoPlayer.NaturalDuration.HasTimeSpan)
+            {
+                var totalSeconds = VideoPlayer.NaturalDuration.TimeSpan.TotalSeconds;
+                var currentSeconds = VideoPlayer.Position.TotalSeconds;
+                if (totalSeconds > 0)
+                {
+                    SeekBar.Value = (currentSeconds / totalSeconds) * 100;
+                }
             }
         }
 
@@ -218,6 +234,13 @@ namespace DogaJimaku
             {
                 var newPosition = VideoPlayer.Position - TimeSpan.FromSeconds(5);
                 VideoPlayer.Position = newPosition < TimeSpan.Zero ? TimeSpan.Zero : newPosition;
+
+                // 一時停止中でも画面を更新
+                if (!_isPlaying)
+                {
+                    UpdateCurrentTimeDisplay();
+                    UpdateSubtitleDisplay(VideoPlayer.Position.TotalSeconds);
+                }
             }
         }
 
@@ -227,6 +250,13 @@ namespace DogaJimaku
             {
                 var newPosition = VideoPlayer.Position - TimeSpan.FromSeconds(1);
                 VideoPlayer.Position = newPosition < TimeSpan.Zero ? TimeSpan.Zero : newPosition;
+
+                // 一時停止中でも画面を更新
+                if (!_isPlaying)
+                {
+                    UpdateCurrentTimeDisplay();
+                    UpdateSubtitleDisplay(VideoPlayer.Position.TotalSeconds);
+                }
             }
         }
 
@@ -237,6 +267,13 @@ namespace DogaJimaku
                 var newPosition = VideoPlayer.Position + TimeSpan.FromSeconds(1);
                 var duration = VideoPlayer.NaturalDuration.TimeSpan;
                 VideoPlayer.Position = newPosition > duration ? duration : newPosition;
+
+                // 一時停止中でも画面を更新
+                if (!_isPlaying)
+                {
+                    UpdateCurrentTimeDisplay();
+                    UpdateSubtitleDisplay(VideoPlayer.Position.TotalSeconds);
+                }
             }
         }
 
@@ -247,6 +284,13 @@ namespace DogaJimaku
                 var newPosition = VideoPlayer.Position + TimeSpan.FromSeconds(5);
                 var duration = VideoPlayer.NaturalDuration.TimeSpan;
                 VideoPlayer.Position = newPosition > duration ? duration : newPosition;
+
+                // 一時停止中でも画面を更新
+                if (!_isPlaying)
+                {
+                    UpdateCurrentTimeDisplay();
+                    UpdateSubtitleDisplay(VideoPlayer.Position.TotalSeconds);
+                }
             }
         }
 
@@ -832,25 +876,86 @@ namespace DogaJimaku
             {
                 try
                 {
+                    // UIの状態を変更
                     ProgressPanel.Visibility = Visibility.Visible;
                     ProgressBar.Value = 0;
                     TxtProgress.Text = "動画を処理中...";
 
-                    // TODO: 実際のFFmpeg処理を実装
-                    // 現在は簡易的な処理のみ
-                    await Task.Delay(2000); // 仮の処理時間
+                    // ボタンを無効化
+                    BtnProcessVideo.IsEnabled = false;
+                    BtnExportVideo.IsEnabled = false;
+                    BtnOpenVideo.IsEnabled = false;
+                    BtnAddSubtitle.IsEnabled = false;
+                    BtnSave.IsEnabled = false;
+                    BtnExport.IsEnabled = false;
+                    BtnPlayPause.IsEnabled = false;
+                    BtnStop.IsEnabled = false;
 
-                    ProgressBar.Value = 100;
-                    TxtProgress.Text = "完了!";
-                    MessageBox.Show($"編集した動画を保存しました:\n{dialog.FileName}\n\n注意: 実際の動画処理機能は次のバージョンで実装されます。", "処理完了", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // 動画を停止
+                    if (_isPlaying)
+                    {
+                        VideoPlayer.Pause();
+                        _timer?.Stop();
+                        _isPlaying = false;
+                        BtnPlayPause.Content = "▶️ 再生";
+                    }
+
+                    _exportCancellationTokenSource = new CancellationTokenSource();
+                    var exportService = new VideoExportService();
+
+                    // 進捗イベント
+                    exportService.ProgressChanged += (s, progress) =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            ProgressBar.Value = Math.Min(progress, 100);
+                            TxtProgress.Text = $"処理中... {progress:F0}%";
+                        });
+                    };
+
+                    // 動画編集処理を実行
+                    var success = await exportService.ProcessVideoWithEditsAsync(
+                        _currentVideoPath,
+                        dialog.FileName,
+                        _videoEdits,
+                        _exportCancellationTokenSource.Token
+                    );
+
+                    if (success)
+                    {
+                        ProgressBar.Value = 100;
+                        TxtProgress.Text = "完了!";
+                        MessageBox.Show($"編集した動画を保存しました:\n{dialog.FileName}",
+                            "処理完了", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("動画の処理に失敗しました。FFmpegが正しくインストールされているか確認してください。",
+                            "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"エラーが発生しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"エラーが発生しました: {ex.Message}",
+                        "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 finally
                 {
+                    // UIを元に戻す
                     ProgressPanel.Visibility = Visibility.Collapsed;
+                    ProgressBar.Value = 0;
+
+                    BtnProcessVideo.IsEnabled = true;
+                    BtnExportVideo.IsEnabled = true;
+                    BtnOpenVideo.IsEnabled = true;
+                    BtnAddSubtitle.IsEnabled = true;
+                    BtnSave.IsEnabled = _subtitles.Count > 0;
+                    BtnExport.IsEnabled = _subtitles.Count > 0;
+                    BtnPlayPause.IsEnabled = true;
+                    BtnStop.IsEnabled = true;
+
+                    _exportCancellationTokenSource?.Dispose();
+                    _exportCancellationTokenSource = null;
                 }
             }
         }

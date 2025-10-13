@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DogaJimaku"
         mc:Ignorable="d"
-        Title="DogaJimaku v1.1.0 - 動画字幕エディタ" Height="800" Width="1400">
+        Title="DogaJimaku v1.2.0 - 動画字幕エディタ" Height="800" Width="1400">
     <Window.Resources>
         <Style x:Key="ModernButton" TargetType="Button">
             <Setter Property="Background" Value="#2196F3"/>
