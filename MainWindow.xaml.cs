@@ -357,6 +357,10 @@ namespace DogaJimaku
             }
 
             SubtitleListBox.SelectedItem = newSubtitle;
+
+            // GUIを明示的に更新
+            UpdateSubtitleEditUI(newSubtitle);
+
             TxtSubtitleText.Focus();
 
             BtnSave.IsEnabled = true;
@@ -368,23 +372,31 @@ namespace DogaJimaku
             if (SubtitleListBox.SelectedItem is Subtitle subtitle)
             {
                 _currentEditingSubtitle = subtitle;
-                TxtSubtitleText.Text = subtitle.Text;
-                TxtStartTime.Text = subtitle.StartTime.ToString("F2");
-                TxtEndTime.Text = subtitle.EndTime.ToString("F2");
-                CmbPosition.SelectedIndex = (int)subtitle.Position;
-                SliderFontSize.Value = subtitle.FontSize;
-
-                // 文字色を設定
-                var colorName = subtitle.TextColor.ToString();
-                for (int i = 0; i < CmbTextColor.Items.Count; i++)
-                {
-                    if (CmbTextColor.Items[i] is ComboBoxItem item && item.Tag?.ToString() == colorName)
-                    {
-                        CmbTextColor.SelectedIndex = i;
-                        break;
-                    }
-                }
+                UpdateSubtitleEditUI(subtitle);
             }
+        }
+
+        private void UpdateSubtitleEditUI(Subtitle subtitle)
+        {
+            TxtSubtitleText.Text = subtitle.Text;
+            TxtStartTime.Text = subtitle.StartTime.ToString("F2");
+            TxtEndTime.Text = subtitle.EndTime.ToString("F2");
+            CmbPosition.SelectedIndex = (int)subtitle.Position;
+            SliderFontSize.Value = subtitle.FontSize;
+
+            // 文字色を設定
+            var color = subtitle.TextColor;
+            var selectedIndex = 0; // デフォルトは赤
+
+            if (color == Colors.Red) selectedIndex = 0;
+            else if (color == Colors.White) selectedIndex = 1;
+            else if (color == Colors.Yellow) selectedIndex = 2;
+            else if (color == Colors.Lime) selectedIndex = 3;
+            else if (color == Colors.Cyan) selectedIndex = 4;
+            else if (color == Colors.Magenta) selectedIndex = 5;
+            else if (color == Colors.Black) selectedIndex = 6;
+
+            CmbTextColor.SelectedIndex = selectedIndex;
         }
 
         private void TxtSubtitleText_TextChanged(object sender, TextChangedEventArgs e)
